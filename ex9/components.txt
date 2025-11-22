@@ -1,0 +1,18 @@
+Item number: C001
+Name:Ceramic Capacitor
+Measure unitpF
+Value:100
+Country producer: Japan
+Price: 2.5 BGN
+Item number: C002
+Name:Electrolytic Capacitor
+Measure unituF
+Value:220
+Country producer: China
+Price: 3.8 BGN
+Item number: C003
+Name:Film Capacitor
+Measure unitnF
+Value:150
+Country producer: USA
+Price: 4 BGN

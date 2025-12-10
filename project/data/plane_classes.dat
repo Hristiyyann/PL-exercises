@@ -1,7 +1,0 @@
-# Plane Classes Data File
-# Format: manufacturer|model|seatCount|minRunway|fuelConsumption|tankVolume|avgSpeed|crewCount
-Boeing|737-800|189|2500|0.03|26020|842|5
-Airbus|A320|180|2100|0.028|24210|840|4
-Embraer|E190|114|2000|0.032|13230|823|4
-Boeing|777-300ER|396|3050|0.025|181280|905|10
-Airbus|A380|525|3000|0.022|320000|900|20

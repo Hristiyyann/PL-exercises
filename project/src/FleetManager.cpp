@@ -1,209 +1,101 @@
-/**
- * @file FleetManager.cpp
- * @brief Implementation of the FleetManager class
- *
- * REQUIREMENT FULFILLED: Support for arbitrary number of different airplanes (10 points)
- * REQUIREMENT FULFILLED: Search for airplanes that can fly to a destination (10 points)
- * REQUIREMENT FULFILLED: File I/O operations - read and store data to files (20 points)
- * REQUIREMENT FULFILLED: Overload << operator (10 points)
- */
-
-#include "../include/FleetManager.h"
-#include <sstream>
-#include <iomanip>
+#include "../headers/FleetManager.h"
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
-// ============================================================================
-// CONSTRUCTORS
-// REQUIREMENT FULFILLED: At least two constructors (30 points)
-// ============================================================================
-
-/**
- * @brief Default constructor implementation
- * Initializes with empty collections and default values
- * First constructor as per requirement
- */
 FleetManager::FleetManager()
-    : airplanes_()
-    , destinations_()
-    , planeClasses_()
-    , companyName_("Default Airline")
-    , dataDirectory_("./data") {
-    // Default constructor - collections initialized as empty via initializer list
-}
+    : airplanes_(), destinations_(), planeClasses_(),
+      companyName_("Авиокомпания по подразбиране"), dataDirectory_("./data") {}
 
-/**
- * @brief Parameterized constructor with company name
- * Second constructor as per requirement
- */
-FleetManager::FleetManager(const string& companyName, const string& dataDirectory)
-    : airplanes_()
-    , destinations_()
-    , planeClasses_()
-    , companyName_(companyName)
-    , dataDirectory_(dataDirectory) {
-    // Parameterized constructor - sets company name and data directory
-}
+FleetManager::FleetManager(const string &companyName, const string &dataDirectory)
+    : airplanes_(), destinations_(), planeClasses_(), companyName_(companyName),
+      dataDirectory_(dataDirectory) {}
 
-/**
- * @brief Copy constructor implementation
- * Creates a deep copy of another FleetManager object
- */
-FleetManager::FleetManager(const FleetManager& other)
-    : airplanes_(other.airplanes_)
-    , destinations_(other.destinations_)
-    , planeClasses_(other.planeClasses_)
-    , companyName_(other.companyName_)
-    , dataDirectory_(other.dataDirectory_) {
-    // Copy constructor - all collections deep copied
-}
+FleetManager::FleetManager(const FleetManager &other)
+    : airplanes_(other.airplanes_), destinations_(other.destinations_),
+      planeClasses_(other.planeClasses_), companyName_(other.companyName_),
+      dataDirectory_(other.dataDirectory_) {}
 
-/**
- * @brief Destructor implementation
- */
-FleetManager::~FleetManager() {
-    // Destructor - vector members are automatically cleaned up
-}
+FleetManager::~FleetManager() {}
 
-// ============================================================================
-// GETTERS
-// REQUIREMENT FULFILLED: Public getters for private instance variables (30 points)
-// ============================================================================
+string FleetManager::getCompanyName() const { return companyName_; }
 
-string FleetManager::getCompanyName() const {
-    return companyName_;
-}
+string FleetManager::getDataDirectory() const { return dataDirectory_; }
 
-string FleetManager::getDataDirectory() const {
-    return dataDirectory_;
-}
+size_t FleetManager::getAirplaneCount() const { return airplanes_.size(); }
 
-size_t FleetManager::getAirplaneCount() const {
-    return airplanes_.size();
-}
+size_t FleetManager::getDestinationCount() const { return destinations_.size(); }
 
-size_t FleetManager::getDestinationCount() const {
-    return destinations_.size();
-}
+size_t FleetManager::getPlaneClassCount() const { return planeClasses_.size(); }
 
-size_t FleetManager::getPlaneClassCount() const {
-    return planeClasses_.size();
-}
+const vector<Airplane> &FleetManager::getAirplanes() const { return airplanes_; }
 
-const vector<Airplane>& FleetManager::getAirplanes() const {
-    return airplanes_;
-}
+const vector<Destination> &FleetManager::getDestinations() const { return destinations_; }
 
-const vector<Destination>& FleetManager::getDestinations() const {
-    return destinations_;
-}
+const vector<PlaneClass> &FleetManager::getPlaneClasses() const { return planeClasses_; }
 
-const vector<PlaneClass>& FleetManager::getPlaneClasses() const {
-    return planeClasses_;
-}
+void FleetManager::setCompanyName(const string &name) { companyName_ = name; }
 
-// ============================================================================
-// SETTERS
-// REQUIREMENT FULFILLED: Public setters for private instance variables (30 points)
-// ============================================================================
+void FleetManager::setDataDirectory(const string &directory) { dataDirectory_ = directory; }
 
-void FleetManager::setCompanyName(const string& name) {
-    companyName_ = name;
-}
-
-void FleetManager::setDataDirectory(const string& directory) {
-    dataDirectory_ = directory;
-}
-
-// ============================================================================
-// AIRPLANE MANAGEMENT
-// REQUIREMENT FULFILLED: Support for arbitrary number of different airplanes (10 points)
-// ============================================================================
-
-/**
- * @brief Add a new plane class to the system
- * Prevents duplicate entries based on class ID
- */
-bool FleetManager::addPlaneClass(const PlaneClass& planeClass) {
-    // Check if plane class already exists
-    for (const auto& pc : planeClasses_) {
-        if (pc == planeClass) {
-            return false; // Already exists
+bool FleetManager::addPlaneClass(const PlaneClass &planeClassToAdd) {
+    for (const auto &planeClass : planeClasses_) {
+        if (planeClass == planeClassToAdd) {
+            return false;
         }
     }
-
-    planeClasses_.push_back(planeClass);
+    planeClasses_.push_back(planeClassToAdd);
     return true;
 }
 
-/**
- * @brief Add a new airplane to the fleet
- * REQUIREMENT: Supports arbitrary number of different airplanes (10 points)
- * Prevents duplicate entries based on identification number
- */
-bool FleetManager::addAirplane(const Airplane& airplane) {
-    // Check if airplane already exists
-    for (const auto& a : airplanes_) {
-        if (a == airplane) {
-            return false; // Already exists
+bool FleetManager::addAirplane(const Airplane &airplaneToAdd) {
+    for (const auto &airplane : airplanes_) {
+        if (airplane == airplaneToAdd) {
+            return false;
         }
     }
-
-    airplanes_.push_back(airplane);
+    airplanes_.push_back(airplaneToAdd);
     return true;
 }
 
-/**
- * @brief Add a new destination
- * Prevents duplicate entries based on code
- */
-bool FleetManager::addDestination(const Destination& destination) {
-    // Check if destination already exists
-    for (const auto& d : destinations_) {
-        if (d == destination) {
-            return false; // Already exists
+bool FleetManager::addDestination(const Destination &destinationToAdd) {
+    for (const auto &destination : destinations_) {
+        if (destination == destinationToAdd) {
+            return false;
         }
     }
-
-    destinations_.push_back(destination);
+    destinations_.push_back(destinationToAdd);
     return true;
 }
 
-/**
- * @brief Remove an airplane from the fleet by ID
- */
-bool FleetManager::removeAirplane(const string& id) {
+bool FleetManager::removeAirplaneById(const string &id) {
     auto it = remove_if(airplanes_.begin(), airplanes_.end(),
-        [&id](const Airplane& a) { return a.getIdentificationNumber() == id; });
+        [&id](const Airplane &a) { return a.getIdentificationNumber() == id; });
 
-    if (it != airplanes_.end()) {
-        airplanes_.erase(it, airplanes_.end());
-        return true;
+    if (it == airplanes_.end()) {
+        return false;
     }
-    return false;
+
+    airplanes_.erase(it, airplanes_.end());
+    return true;
 }
 
-/**
- * @brief Remove a destination by code
- */
-bool FleetManager::removeDestination(const string& code) {
+bool FleetManager::removeDestinationByCode(const string &code) {
     auto it = remove_if(destinations_.begin(), destinations_.end(),
-        [&code](const Destination& d) { return d.getCode() == code; });
+        [&code](const Destination &d) { return d.getCode() == code; });
 
-    if (it != destinations_.end()) {
-        destinations_.erase(it, destinations_.end());
-        return true;
+    if (it == destinations_.end()) {
+        return false;
     }
-    return false;
+
+    destinations_.erase(it, destinations_.end());
+    return true;
 }
 
-/**
- * @brief Find an airplane by its ID
- */
-Airplane* FleetManager::findAirplaneById(const string& id) {
-    for (auto& airplane : airplanes_) {
+Airplane *FleetManager::findAirplaneById(const string &id) {
+    for (auto &airplane : airplanes_) {
         if (airplane.getIdentificationNumber() == id) {
             return &airplane;
         }
@@ -211,11 +103,8 @@ Airplane* FleetManager::findAirplaneById(const string& id) {
     return nullptr;
 }
 
-/**
- * @brief Find a destination by its code
- */
-Destination* FleetManager::findDestinationByCode(const string& code) {
-    for (auto& destination : destinations_) {
+Destination *FleetManager::findDestinationByCode(const string &code) {
+    for (auto &destination : destinations_) {
         if (destination.getCode() == code) {
             return &destination;
         }
@@ -223,11 +112,8 @@ Destination* FleetManager::findDestinationByCode(const string& code) {
     return nullptr;
 }
 
-/**
- * @brief Find a plane class by its class ID
- */
-PlaneClass* FleetManager::findPlaneClassById(const string& classId) {
-    for (auto& planeClass : planeClasses_) {
+PlaneClass *FleetManager::findPlaneClassById(const string &classId) {
+    for (auto &planeClass : planeClasses_) {
         if (planeClass.getClassId() == classId) {
             return &planeClass;
         }
@@ -235,233 +121,142 @@ PlaneClass* FleetManager::findPlaneClassById(const string& classId) {
     return nullptr;
 }
 
-// ============================================================================
-// SEARCH FUNCTIONALITY
-// REQUIREMENT FULFILLED: Search for airplanes that can fly to a destination (10 points)
-// ============================================================================
+vector<Airplane *> FleetManager::findAirplanesForDestination(const string &destinationCode) {
+    vector<Airplane *> compatibleAirplanes;
 
-/**
- * @brief Find all airplanes that can fly to a specific destination
- * REQUIREMENT: Search for airplanes for destination (10 points)
- *
- * This method evaluates each airplane's compatibility based on:
- * - Runway length requirements (from PlaneClass)
- * - Maximum flight range (from PlaneClass)
- * - Operational status
- */
-vector<Airplane*> FleetManager::findAirplanesForDestination(const string& destinationCode) {
-    vector<Airplane*> compatibleAirplanes;
-
-    // Find the destination
-    Destination* dest = findDestinationByCode(destinationCode);
+    Destination *dest = findDestinationByCode(destinationCode);
     if (dest == nullptr) {
-        return compatibleAirplanes; // Empty vector if destination not found
+        return compatibleAirplanes;
     }
 
-    // Check each airplane for compatibility
-    for (auto& airplane : airplanes_) {
+    for (auto &airplane : airplanes_) {
         if (airplane.canFlyToDestination(dest->getRunwayLengthMeters(),
-                                          dest->getDistanceFromBaseKm())) {
+                                         dest->getDistanceFromBaseKm())) {
             compatibleAirplanes.push_back(&airplane);
         }
     }
-
     return compatibleAirplanes;
 }
 
-/**
- * @brief Find all airplanes compatible with given runway and distance
- * Alternative search method with direct parameters
- */
-vector<Airplane*> FleetManager::findCompatibleAirplanes(double runwayLength, double distance) {
-    vector<Airplane*> compatibleAirplanes;
-
-    for (auto& airplane : airplanes_) {
+vector<Airplane *> FleetManager::findCompatibleAirplanes(double runwayLength, double distance) {
+    vector<Airplane *> compatibleAirplanes;
+    for (auto &airplane : airplanes_) {
         if (airplane.canFlyToDestination(runwayLength, distance)) {
             compatibleAirplanes.push_back(&airplane);
         }
     }
-
     return compatibleAirplanes;
 }
 
-/**
- * @brief Get all operational airplanes
- */
-vector<Airplane*> FleetManager::getOperationalAirplanes() {
-    vector<Airplane*> operationalAirplanes;
-
-    for (auto& airplane : airplanes_) {
+vector<Airplane *> FleetManager::getOperationalAirplanes() {
+    vector<Airplane *> operationalAirplanes;
+    for (auto &airplane : airplanes_) {
         if (airplane.isOperational()) {
             operationalAirplanes.push_back(&airplane);
         }
     }
-
     return operationalAirplanes;
 }
 
-// ============================================================================
-// DISPLAY METHODS
-// ============================================================================
-
-/**
- * @brief Display all airplanes in the fleet
- */
-void FleetManager::displayAllAirplanes(ostream& os) const {
-    os << "\n========== FLEET AIRPLANES ==========" << endl;
-    os << "Total airplanes: " << airplanes_.size() << endl;
-    os << "======================================\n" << endl;
+void FleetManager::displayAllAirplanes(ostream &os) const {
+    os << "\nСАМОЛЕТИ ВЪВ ФЛОТА" << endl;
+    os << "Общ брой самолети: " << airplanes_.size() << "\n" << endl;
 
     if (airplanes_.empty()) {
-        os << "No airplanes in the fleet." << endl;
-    } else {
-        int count = 1;
-        for (const auto& airplane : airplanes_) {
-            os << "[" << count++ << "] ";
-            os << airplane << endl;
-        }
+        os << "Няма самолети във флота." << endl;
+        return;
+    }
+
+    int count = 1;
+    for (const auto &airplane : airplanes_) {
+        os << "[" << count++ << "] ";
+        os << airplane << endl;
     }
 }
 
-/**
- * @brief Display all destinations
- */
-void FleetManager::displayAllDestinations(ostream& os) const {
-    os << "\n========== DESTINATIONS ==========" << endl;
-    os << "Total destinations: " << destinations_.size() << endl;
-    os << "==================================\n" << endl;
+void FleetManager::displayAllDestinations(ostream &os) const {
+    os << "\nДЕСТИНАЦИИ" << endl;
+    os << "Общ брой дестинации: " << destinations_.size() << "\n" << endl;
 
     if (destinations_.empty()) {
-        os << "No destinations registered." << endl;
-    } else {
-        int count = 1;
-        for (const auto& destination : destinations_) {
-            os << "[" << count++ << "] ";
-            os << destination << endl;
-        }
+        os << "Няма регистрирани дестинации." << endl;
+        return;
+    }
+
+    int count = 1;
+    for (const auto &destination : destinations_) {
+        os << "[" << count++ << "] ";
+        os << destination << endl;
     }
 }
 
-/**
- * @brief Display all plane classes
- */
-void FleetManager::displayAllPlaneClasses(ostream& os) const {
-    os << "\n========== PLANE CLASSES ==========" << endl;
-    os << "Total plane classes: " << planeClasses_.size() << endl;
-    os << "====================================\n" << endl;
+void FleetManager::displayAllPlaneClasses(ostream &os) const {
+    os << "\nКЛАСОВЕ САМОЛЕТИ" << endl;
+    os << "Общ брой класове: " << planeClasses_.size() << "\n" << endl;
 
     if (planeClasses_.empty()) {
-        os << "No plane classes registered." << endl;
-    } else {
-        int count = 1;
-        for (const auto& planeClass : planeClasses_) {
-            os << "[" << count++ << "] ";
-            os << planeClass << endl;
-        }
+        os << "Няма регистрирани класове самолети." << endl;
+        return;
+    }
+
+    int count = 1;
+    for (const auto &planeClass : planeClasses_) {
+        os << "[" << count++ << "] ";
+        os << planeClass << endl;
     }
 }
 
-// ============================================================================
-// FILE I/O OPERATIONS
-// REQUIREMENT FULFILLED: File I/O operations - read and store data to files (20 points)
-// ============================================================================
-
-/**
- * @brief Save plane classes to file
- * Format: manufacturer|model|seatCount|minRunway|fuelConsumption|tankVolume|avgSpeed|crewCount
- */
-bool FleetManager::savePlaneClassesToFile(const string& filename) const {
+bool FleetManager::savePlaneClassesToFile(const string &filename) const {
     ofstream file(filename);
     if (!file.is_open()) {
         return false;
     }
 
-    // Write header comment
-    file << "# Plane Classes Data File" << endl;
-    file << "# Format: manufacturer|model|seatCount|minRunway|fuelConsumption|tankVolume|avgSpeed|crewCount" << endl;
-
-    // Write each plane class
-    for (const auto& pc : planeClasses_) {
-        file << pc.getManufacturer() << "|"
-             << pc.getModel() << "|"
-             << pc.getSeatCount() << "|"
-             << pc.getMinRunwayLength() << "|"
-             << pc.getFuelConsumptionPerKmPerSeat() << "|"
-             << pc.getTankVolumeLiters() << "|"
-             << pc.getAverageSpeedKmh() << "|"
-             << pc.getRequiredCrewCount() << endl;
+    for (const auto &pc : planeClasses_) {
+        file << pc.getManufacturer() << " " << pc.getModel() << " "
+             << pc.getSeatCount() << " " << pc.getMinRunwayLength() << " "
+             << pc.getFuelConsumptionPerKmPerSeat() << " "
+             << pc.getTankVolumeLiters() << " " << pc.getAverageSpeedKmh()
+             << " " << pc.getRequiredCrewCount() << endl;
     }
-
     file.close();
     return true;
 }
 
-/**
- * @brief Load plane classes from file
- * REQUIREMENT: File I/O operations (20 points)
- */
-bool FleetManager::loadPlaneClassesFromFile(const string& filename) {
+bool FleetManager::loadPlaneClassesFromFile(const string &filename) {
     ifstream file(filename);
     if (!file.is_open()) {
         return false;
     }
 
-    string line;
-    while (getline(file, line)) {
-        // Skip empty lines and comments
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        PlaneClass pc;
-        istringstream iss(line);
-
-        // Use >> operator to read the data
-        istringstream lineStream(line);
-        lineStream >> pc;
-
-        // Validate and add
+    PlaneClass pc;
+    while (file >> pc) {
         if (!pc.getManufacturer().empty()) {
             addPlaneClass(pc);
         }
     }
-
     file.close();
     return true;
 }
 
-/**
- * @brief Save airplanes to file
- * Format: id|planeClassId|operational|baseAirport|flightHours
- */
-bool FleetManager::saveAirplanesToFile(const string& filename) const {
+bool FleetManager::saveAirplanesToFile(const string &filename) const {
     ofstream file(filename);
     if (!file.is_open()) {
         return false;
     }
 
-    // Write header comment
-    file << "# Airplanes Data File" << endl;
-    file << "# Format: id|planeClassId|operational|baseAirport|flightHours" << endl;
-
-    // Write each airplane
-    for (const auto& airplane : airplanes_) {
-        file << airplane.getIdentificationNumber() << "|"
-             << airplane.getPlaneClassRef().getClassId() << "|"
-             << (airplane.isOperational() ? "1" : "0") << "|"
-             << airplane.getBaseAirportCode() << "|"
+    for (const auto &airplane : airplanes_) {
+        file << airplane.getIdentificationNumber() << "\t"
+             << airplane.getPlaneClassRef().getClassId() << "\t"
+             << (airplane.isOperational() ? 1 : 0) << "\t"
+             << airplane.getBaseAirportCode() << "\t"
              << airplane.getTotalFlightHours() << endl;
     }
-
     file.close();
     return true;
 }
 
-/**
- * @brief Load airplanes from file
- * REQUIREMENT: File I/O operations (20 points)
- */
-bool FleetManager::loadAirplanesFromFile(const string& filename) {
+bool FleetManager::loadAirplanesFromFile(const string &filename) {
     ifstream file(filename);
     if (!file.is_open()) {
         return false;
@@ -469,81 +264,52 @@ bool FleetManager::loadAirplanesFromFile(const string& filename) {
 
     string line;
     while (getline(file, line)) {
-        // Skip empty lines and comments
-        if (line.empty() || line[0] == '#') {
+        if (line.empty()) {
             continue;
         }
 
         istringstream iss(line);
-        string token;
         string id, planeClassId, baseAirport;
-        bool operational = true;
-        int flightHours = 0;
+        int operational, flightHours;
 
-        // Parse the line manually for better control
-        if (getline(iss, id, '|') &&
-            getline(iss, planeClassId, '|')) {
+        if (!getline(iss, id, '\t')) continue;
+        if (!getline(iss, planeClassId, '\t')) continue;
 
-            if (getline(iss, token, '|')) {
-                operational = (token == "1" || token == "true");
-            }
-            if (getline(iss, baseAirport, '|')) {
-                // baseAirport already set
-            }
-            if (getline(iss, token, '|')) {
-                try {
-                    flightHours = stoi(token);
-                } catch (...) {
-                    flightHours = 0;
-                }
-            }
+        string operationalStr, flightHoursStr;
+        if (!getline(iss, operationalStr, '\t')) continue;
+        if (!getline(iss, baseAirport, '\t')) continue;
+        if (!getline(iss, flightHoursStr)) continue;
 
-            // Find the plane class
-            PlaneClass* pc = findPlaneClassById(planeClassId);
-            if (pc != nullptr) {
-                Airplane airplane(id, *pc, operational, baseAirport, flightHours);
-                addAirplane(airplane);
-            }
+        operational = stoi(operationalStr);
+        flightHours = stoi(flightHoursStr);
+
+        PlaneClass *pc = findPlaneClassById(planeClassId);
+        if (pc == nullptr) {
+            continue;
         }
+        Airplane airplane(id, *pc, operational == 1, baseAirport, flightHours);
+        addAirplane(airplane);
     }
-
     file.close();
     return true;
 }
 
-/**
- * @brief Save destinations to file
- * Format: code|name|city|country|runwayLength|distanceFromBase
- */
-bool FleetManager::saveDestinationsToFile(const string& filename) const {
+bool FleetManager::saveDestinationsToFile(const string &filename) const {
     ofstream file(filename);
     if (!file.is_open()) {
         return false;
     }
 
-    // Write header comment
-    file << "# Destinations Data File" << endl;
-    file << "# Format: code|name|city|country|runwayLength|distanceFromBase" << endl;
-
-    // Write each destination
-    for (const auto& dest : destinations_) {
-        file << dest.getCode() << "|"
-             << dest.getName() << "|"
-             << dest.getCity() << "|"
-             << dest.getCountry() << "|"
-             << dest.getRunwayLengthMeters() << "|"
-             << dest.getDistanceFromBaseKm() << endl;
+    for (const auto &dest : destinations_) {
+        file << dest.getCode() << "\t" << dest.getName() << "\t" << dest.getCity()
+             << "\t" << dest.getCountry() << "\t" << dest.getRunwayLengthMeters()
+             << "\t" << dest.getDistanceFromBaseKm() << endl;
     }
-
     file.close();
     return true;
 }
 
-/**
- * @brief Load destinations from file
- * REQUIREMENT: File I/O operations (20 points)
- */
-bool FleetManager::loadDestinationsFromFile(const string& filename) {
+bool FleetManager::loadDestinationsFromFile(const string &filename) {
     ifstream file(filename);
     if (!file.is_open()) {
         return false;
@@ -551,103 +317,461 @@ bool FleetManager::loadDestinationsFromFile(const string& filename) {
 
     string line;
     while (getline(file, line)) {
-        // Skip empty lines and comments
-        if (line.empty() || line[0] == '#') {
+        if (line.empty()) {
             continue;
         }
 
-        Destination dest;
-        istringstream lineStream(line);
-        lineStream >> dest;
+        istringstream iss(line);
+        string code, name, city, country, runwayStr, distanceStr;
 
-        // Validate and add
-        if (!dest.getCode().empty()) {
-            addDestination(dest);
-        }
+        if (!getline(iss, code, '\t')) continue;
+        if (!getline(iss, name, '\t')) continue;
+        if (!getline(iss, city, '\t')) continue;
+        if (!getline(iss, country, '\t')) continue;
+        if (!getline(iss, runwayStr, '\t')) continue;
+        if (!getline(iss, distanceStr)) continue;
+
+        double runwayLength = stod(runwayStr);
+        double distance = stod(distanceStr);
+
+        Destination dest(code, name, city, country, runwayLength, distance);
+        addDestination(dest);
     }
-
     file.close();
     return true;
 }
 
-/**
- * @brief Save all data to files
- * REQUIREMENT: File I/O operations (20 points)
- */
 bool FleetManager::saveAllData() const {
-    bool success = true;
-
-    // Save plane classes first (required for airplane linking)
-    if (!savePlaneClassesToFile(dataDirectory_ + "/plane_classes.dat")) {
-        success = false;
-    }
-
-    // Save airplanes
-    if (!saveAirplanesToFile(dataDirectory_ + "/airplanes.dat")) {
-        success = false;
-    }
-
-    // Save destinations
-    if (!saveDestinationsToFile(dataDirectory_ + "/destinations.dat")) {
-        success = false;
-    }
-
-    return success;
+    savePlaneClassesToFile(dataDirectory_ + "/plane_classes.txt");
+    saveAirplanesToFile(dataDirectory_ + "/airplanes.txt");
+    saveDestinationsToFile(dataDirectory_ + "/destinations.txt");
+    return true;
 }
 
-/**
- * @brief Load all data from files
- * REQUIREMENT: File I/O operations (20 points)
- */
 bool FleetManager::loadAllData() {
-    bool success = true;
-
-    // Load plane classes first (required for airplane linking)
-    if (!loadPlaneClassesFromFile(dataDirectory_ + "/plane_classes.dat")) {
-        success = false;
-    }
-
-    // Load airplanes (requires plane classes to be loaded)
-    if (!loadAirplanesFromFile(dataDirectory_ + "/airplanes.dat")) {
-        success = false;
-    }
-
-    // Load destinations
-    if (!loadDestinationsFromFile(dataDirectory_ + "/destinations.dat")) {
-        success = false;
-    }
-
-    return success;
+    loadPlaneClassesFromFile(dataDirectory_ + "/plane_classes.txt");
+    loadAirplanesFromFile(dataDirectory_ + "/airplanes.txt");
+    loadDestinationsFromFile(dataDirectory_ + "/destinations.txt");
+    return true;
 }
 
-/**
- * @brief Clear all data from memory
- */
 void FleetManager::clearAllData() {
     airplanes_.clear();
     destinations_.clear();
     planeClasses_.clear();
 }
 
-// ============================================================================
-// OPERATORS
-// REQUIREMENT FULFILLED: Overload << operator for output (10 points)
-// ============================================================================
-
-/**
- * @brief Overloaded << operator for formatted output
- * Displays fleet manager summary information
- */
-ostream& operator<<(ostream& os, const FleetManager& manager) {
-    os << "========================================" << endl;
-    os << "       FLEET MANAGEMENT SYSTEM" << endl;
-    os << "========================================" << endl;
-    os << "Company Name:        " << manager.companyName_ << endl;
-    os << "Data Directory:      " << manager.dataDirectory_ << endl;
-    os << "----------------------------------------" << endl;
-    os << "Total Plane Classes: " << manager.planeClasses_.size() << endl;
-    os << "Total Airplanes:     " << manager.airplanes_.size() << endl;
-    os << "Total Destinations:  " << manager.destinations_.size() << endl;
-    os << "========================================" << endl;
+ostream &operator<<(ostream &os, const FleetManager &manager) {
+    os << "\nСИСТЕМА ЗА УПРАВЛЕНИЕ НА ФЛОТА" << endl;
+    os << "Име на компанията:   " << manager.companyName_ << endl;
+    os << "Директория с данни:  " << manager.dataDirectory_ << endl;
+    os << "Общо класове:        " << manager.planeClasses_.size() << endl;
+    os << "Общо самолети:       " << manager.airplanes_.size() << endl;
+    os << "Общо дестинации:     " << manager.destinations_.size() << endl;
     return os;
+}
+
+void FleetManager::displayMainMenu() {
+    cout << "\nСИСТЕМА ЗА УПРАВЛЕНИЕ НА АВИОФЛОТА" << endl;
+    cout << "1. Управление на класове самолети" << endl;
+    cout << "2. Управление на самолети" << endl;
+    cout << "3. Управление на дестинации" << endl;
+    cout << "4. Търсене на самолети за дестинация" << endl;
+    cout << "5. Преглед на флота" << endl;
+    cout << "6. Запазване на данните" << endl;
+    cout << "7. Зареждане на данните" << endl;
+    cout << "8. Добавяне на примерни данни" << endl;
+    cout << "0. Изход" << endl;
+    cout << "Въведете избор: ";
+}
+
+void FleetManager::viewPlaneClassDetails() {
+    if (getPlaneClassCount() == 0) {
+        cout << "\nНяма регистрирани класове самолети." << endl;
+        return;
+    }
+
+    displayAllPlaneClasses(cout);
+
+    string classId = Validator::getValidString("Въведете ID на класа (Производител Модел): ");
+    PlaneClass* pc = findPlaneClassById(classId);
+
+    if (pc == nullptr) {
+        cout << "\nКласът самолет не е намерен." << endl;
+        return;
+    }
+
+    cout << "\n" << *pc;
+    cout << "\nИзчислени стойности:" << endl;
+    cout << "Максимален обхват: " << fixed << setprecision(2)
+              << pc->calculateMaxRange() << " км" << endl;
+    cout << "Продължителност на полет за 1000 км: "
+              << pc->calculateFlightDuration(1000) << " часа" << endl;
+}
+
+void FleetManager::handlePlaneClassMenu() {
+    int choice;
+    do {
+        PlaneClass::displayMenu();
+        choice = Validator::getValidInt("");
+
+        switch (choice) {
+            case 1: {
+                cout << "\nДОБАВЯНЕ НА НОВ КЛАС САМОЛЕТ" << endl;
+                try {
+                    string manufacturer = Validator::getValidString("Производител (напр. Boeing, Airbus): ");
+                    string model = Validator::getValidString("Модел (напр. 737-800, A320): ");
+                    int seatCount = Validator::getValidPositiveInt("Брой места: ");
+                    double minRunway = Validator::getValidPositiveDouble("Минимална дължина на пистата (метри): ");
+                    double fuelConsumption = Validator::getValidPositiveDouble("Разход на гориво (литри/км/място): ");
+                    double tankVolume = Validator::getValidPositiveDouble("Обем на резервоара (литри): ");
+                    double avgSpeed = Validator::getValidPositiveDouble("Средна скорост (км/ч): ");
+                    int crewCount = Validator::getValidPositiveInt("Необходим екипаж: ");
+
+                    PlaneClass newClass(manufacturer, model, seatCount, minRunway,
+                                       fuelConsumption, tankVolume, avgSpeed, crewCount);
+
+                    if (!addPlaneClass(newClass)) {
+                        cout << "\nНеуспешно добавяне. Класът вероятно вече съществува." << endl;
+                    } else {
+                        cout << "\nКласът самолет е добавен успешно!" << endl;
+                        cout << newClass;
+                    }
+                } catch (const exception& e) {
+                    cout << "\nГрешка: " << e.what() << endl;
+                }
+                break;
+            }
+            case 2:
+                displayAllPlaneClasses(cout);
+                break;
+            case 3:
+                viewPlaneClassDetails();
+                break;
+            case 0:
+                cout << "Връщане към главното меню..." << endl;
+                break;
+            default:
+                cout << "Невалиден избор. Моля, опитайте отново." << endl;
+        }
+    } while (choice != 0);
+}
+
+void FleetManager::viewAirplaneDetails() {
+    if (getAirplaneCount() == 0) {
+        cout << "\nНяма самолети във флота." << endl;
+        return;
+    }
+
+    string id = Validator::getValidString("Въведете ID на самолета: ");
+    Airplane* airplane = findAirplaneById(id);
+
+    if (airplane == nullptr) {
+        cout << "\nСамолетът не е намерен." << endl;
+        return;
+    }
+
+    cout << "\n" << *airplane;
+    cout << "\nДанни за класа:" << endl;
+    cout << airplane->getPlaneClassRef();
+}
+
+void FleetManager::toggleOperationalStatus() {
+    if (getAirplaneCount() == 0) {
+        cout << "\nНяма самолети във флота." << endl;
+        return;
+    }
+
+    string id = Validator::getValidString("Въведете ID на самолета: ");
+    Airplane* airplane = findAirplaneById(id);
+
+    if (airplane == nullptr) {
+        cout << "Самолетът не е намерен." << endl;
+        return;
+    }
+
+    airplane->setOperational(!airplane->isOperational());
+    cout << "Оперативният статус е променен на: "
+              << (airplane->isOperational() ? "Оперативен" : "Неоперативен") << endl;
+}
+
+void FleetManager::handleAirplaneMenu() {
+    int choice;
+    do {
+        Airplane::displayMenu();
+        choice = Validator::getValidInt("");
+
+        switch (choice) {
+            case 1: {
+                cout << "\nДОБАВЯНЕ НА НОВ САМОЛЕТ" << endl;
+                if (getPlaneClassCount() == 0) {
+                    cout << "Няма налични класове самолети. Моля, първо добавете клас." << endl;
+                    break;
+                }
+                cout << "\nНалични класове самолети:" << endl;
+                displayAllPlaneClasses(cout);
+                try {
+                    string id = Validator::getValidString("ID на самолета (регистрационен номер): ");
+                    string classId = Validator::getValidString("ID на класа (Производител Модел): ");
+                    PlaneClass* pc = findPlaneClassById(classId);
+                    if (pc == nullptr) {
+                        cout << "Класът самолет не е намерен." << endl;
+                        break;
+                    }
+                    string baseAirport = Validator::getValidString("Код на базовото летище: ");
+                    Airplane newAirplane(id, *pc, true, baseAirport, 0);
+                    if (!addAirplane(newAirplane)) {
+                        cout << "\nНеуспешно добавяне. Самолетът вероятно вече съществува." << endl;
+                    } else {
+                        cout << "\nСамолетът е добавен успешно!" << endl;
+                        cout << newAirplane;
+                    }
+                } catch (const exception& e) {
+                    cout << "\nГрешка: " << e.what() << endl;
+                }
+                break;
+            }
+            case 2:
+                displayAllAirplanes(cout);
+                break;
+            case 3:
+                viewAirplaneDetails();
+                break;
+            case 4: {
+                if (getAirplaneCount() == 0) {
+                    cout << "\nНяма самолети във флота." << endl;
+                    break;
+                }
+                displayAllAirplanes(cout);
+                string id = Validator::getValidString("Въведете ID на самолета за премахване: ");
+                if (!removeAirplaneById(id)) {
+                    cout << "Самолетът не е намерен." << endl;
+                } else {
+                    cout << "Самолетът е премахнат успешно." << endl;
+                }
+                break;
+            }
+            case 5:
+                toggleOperationalStatus();
+                break;
+            case 6: {
+                if (getAirplaneCount() == 0) {
+                    cout << "\nНяма самолети във флота." << endl;
+                    break;
+                }
+                string id = Validator::getValidString("Въведете ID на самолета: ");
+                Airplane* airplane = findAirplaneById(id);
+                if (airplane == nullptr) {
+                    cout << "Самолетът не е намерен." << endl;
+                    break;
+                }
+                int hours = Validator::getValidPositiveInt("Въведете брой часове за добавяне: ");
+                airplane->addFlightHours(hours);
+                cout << "Добавени " << hours << " летателни часа." << endl;
+                cout << "Общо летателни часове: " << airplane->getTotalFlightHours() << endl;
+                break;
+            }
+            case 0:
+                cout << "Връщане към главното меню..." << endl;
+                break;
+            default:
+                cout << "Невалиден избор. Моля, опитайте отново." << endl;
+        }
+    } while (choice != 0);
+}
+
+void FleetManager::viewDestinationDetails() {
+    if (getDestinationCount() == 0) {
+        cout << "\nНяма регистрирани дестинации." << endl;
+        return;
+    }
+
+    string code = Validator::getValidString("Въведете код на дестинацията: ");
+    Destination* dest = findDestinationByCode(code);
+
+    if (dest == nullptr) {
+        cout << "\nДестинацията не е намерена." << endl;
+        return;
+    }
+
+    cout << "\n" << *dest;
+}
+
+void FleetManager::handleDestinationMenu() {
+    int choice;
+    do {
+        Destination::displayMenu();
+        choice = Validator::getValidInt("");
+
+        switch (choice) {
+            case 1: {
+                cout << "\nДОБАВЯНЕ НА НОВА ДЕСТИНАЦИЯ" << endl;
+                try {
+                    string code = Validator::getValidString("IATA код (напр. SOF, LHR): ");
+                    string name = Validator::getValidString("Име на летището: ");
+                    string city = Validator::getValidString("Град: ");
+                    string country = Validator::getValidString("Държава: ");
+                    double runwayLength = Validator::getValidPositiveDouble("Дължина на пистата (метри): ");
+                    double distance = Validator::getValidNonNegativeDouble("Разстояние от базата (км): ");
+
+                    Destination newDest(code, name, city, country, runwayLength, distance);
+
+                    if (!addDestination(newDest)) {
+                        cout << "\nНеуспешно добавяне. Дестинацията вероятно вече съществува." << endl;
+                    } else {
+                        cout << "\nДестинацията е добавена успешно!" << endl;
+                        cout << newDest;
+                    }
+                } catch (const exception& e) {
+                    cout << "\nГрешка: " << e.what() << endl;
+                }
+                break;
+            }
+            case 2:
+                displayAllDestinations(cout);
+                break;
+            case 3:
+                viewDestinationDetails();
+                break;
+            case 4: {
+                if (getDestinationCount() == 0) {
+                    cout << "\nНяма регистрирани дестинации." << endl;
+                    break;
+                }
+                displayAllDestinations(cout);
+                string code = Validator::getValidString("Въведете код на дестинацията за премахване: ");
+                if (!removeDestinationByCode(code)) {
+                    cout << "Дестинацията не е намерена." << endl;
+                } else {
+                    cout << "Дестинацията е премахната успешно." << endl;
+                }
+                break;
+            }
+            case 0:
+                cout << "Връщане към главното меню..." << endl;
+                break;
+            default:
+                cout << "Невалиден избор. Моля, опитайте отново." << endl;
+        }
+    } while (choice != 0);
+}
+
+void FleetManager::searchAirplanesForDestination() {
+    cout << "\nТЪРСЕНЕ НА САМОЛЕТИ ЗА ДЕСТИНАЦИЯ" << endl;
+
+    if (getAirplaneCount() == 0) {
+        cout << "Няма самолети във флота." << endl;
+        return;
+    }
+
+    cout << "\nОпции за търсене:" << endl;
+    cout << "1. Търсене по код на дестинация" << endl;
+    cout << "2. Търсене по дължина на пистата и разстояние" << endl;
+    int searchChoice = Validator::getValidInt("Въведете избор: ");
+
+    vector<Airplane*> compatibleAirplanes;
+
+    if (searchChoice == 1) {
+        if (getDestinationCount() == 0) {
+            cout << "Няма регистрирани дестинации. Моля, използвайте опция 2." << endl;
+            return;
+        }
+
+        displayAllDestinations(cout);
+        string code = Validator::getValidString("Въведете код на дестинацията: ");
+
+        Destination* dest = findDestinationByCode(code);
+        if (dest == nullptr) {
+            cout << "Дестинацията не е намерена." << endl;
+            return;
+        }
+
+        cout << "\nТърсене на съвместими самолети за: " << dest->getDisplayString() << endl;
+        cout << "Писта: " << dest->getRunwayLengthMeters() << " м, Разстояние: "
+                  << dest->getDistanceFromBaseKm() << " км" << endl;
+
+        compatibleAirplanes = findAirplanesForDestination(code);
+    } else {
+        double runwayLength = Validator::getValidPositiveDouble("Въведете дължина на пистата (метри): ");
+        double distance = Validator::getValidNonNegativeDouble("Въведете разстояние от базата (км): ");
+
+        compatibleAirplanes = findCompatibleAirplanes(runwayLength, distance);
+    }
+
+    cout << "\nРЕЗУЛТАТИ ОТ ТЪРСЕНЕТО" << endl;
+    cout << "Намерени съвместими самолети: " << compatibleAirplanes.size() << "\n" << endl;
+
+    if (compatibleAirplanes.empty()) {
+        cout << "Не са намерени съвместими самолети за тази дестинация." << endl;
+        cout << "\nВъзможни причини:" << endl;
+        cout << "- Пистата е твърде къса за наличните самолети" << endl;
+        cout << "- Разстоянието надвишава максималния обхват" << endl;
+        cout << "- Всички съвместими самолети са неоперативни" << endl;
+        return;
+    }
+
+    int count = 1;
+    for (const auto* airplane : compatibleAirplanes) {
+        cout << "[" << count++ << "] " << *airplane << endl;
+    }
+}
+
+void FleetManager::addSampleData() {
+    cout << "\nДОБАВЯНЕ НА ПРИМЕРНИ ДАННИ" << endl;
+
+    try {
+        PlaneClass boeing737("Boeing", "737-800", 189, 2500.0, 0.03, 26020.0, 842.0, 5);
+        PlaneClass airbusA320("Airbus", "A320", 180, 2100.0, 0.028, 24210.0, 840.0, 4);
+        PlaneClass embraerE190("Embraer", "E190", 114, 2000.0, 0.032, 13230.0, 823.0, 4);
+        PlaneClass boeing777("Boeing", "777-300ER", 396, 3050.0, 0.025, 181280.0, 905.0, 10);
+        PlaneClass airbusA380("Airbus", "A380", 525, 3000.0, 0.022, 320000.0, 900.0, 20);
+
+        addPlaneClass(boeing737);
+        addPlaneClass(airbusA320);
+        addPlaneClass(embraerE190);
+        addPlaneClass(boeing777);
+        addPlaneClass(airbusA380);
+
+        cout << "Добавени 5 класа самолети." << endl;
+
+        Airplane plane1("LZ-SOF-001", boeing737, true, "SOF", 5000);
+        Airplane plane2("LZ-SOF-002", boeing737, true, "SOF", 3200);
+        Airplane plane3("LZ-SOF-003", airbusA320, true, "SOF", 4500);
+        Airplane plane4("LZ-VAR-001", embraerE190, true, "VAR", 2800);
+        Airplane plane5("LZ-VAR-002", embraerE190, false, "VAR", 6000);
+        Airplane plane6("LZ-SOF-004", boeing777, true, "SOF", 12000);
+        Airplane plane7("LZ-SOF-005", airbusA380, true, "SOF", 8000);
+
+        addAirplane(plane1);
+        addAirplane(plane2);
+        addAirplane(plane3);
+        addAirplane(plane4);
+        addAirplane(plane5);
+        addAirplane(plane6);
+        addAirplane(plane7);
+
+        cout << "Добавени 7 самолета." << endl;
+
+        Destination sofia("SOF", "Летище София", "София", "България", 3600.0, 0.0);
+        Destination varna("VAR", "Летище Варна", "Варна", "България", 2500.0, 380.0);
+        Destination london("LHR", "Heathrow Airport", "London", "UK", 3900.0, 2020.0);
+        Destination paris("CDG", "Charles de Gaulle", "Paris", "France", 4200.0, 1850.0);
+        Destination dubai("DXB", "Dubai International", "Dubai", "UAE", 4500.0, 4100.0);
+        Destination tokyo("NRT", "Narita International", "Tokyo", "Japan", 4000.0, 9100.0);
+        Destination smallIsland("ISL", "Small Island Strip", "Island", "Pacific", 1500.0, 2000.0);
+
+        addDestination(sofia);
+        addDestination(varna);
+        addDestination(london);
+        addDestination(paris);
+        addDestination(dubai);
+        addDestination(tokyo);
+        addDestination(smallIsland);
+
+        cout << "Добавени 7 дестинации." << endl;
+        cout << "\nПримерните данни са добавени успешно!" << endl;
+
+    } catch (const exception& e) {
+        cout << "Грешка при добавяне на примерни данни: " << e.what() << endl;
+    }
 }

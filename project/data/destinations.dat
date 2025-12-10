@@ -1,9 +1,0 @@
-# Destinations Data File
-# Format: code|name|city|country|runwayLength|distanceFromBase
-SOF|Sofia Airport|Sofia|Bulgaria|3600|0
-VAR|Varna Airport|Varna|Bulgaria|2500|380
-LHR|Heathrow Airport|London|UK|3900|2020
-CDG|Charles de Gaulle|Paris|France|4200|1850
-DXB|Dubai International|Dubai|UAE|4500|4100
-NRT|Narita International|Tokyo|Japan|4000|9100
-ISL|Small Island Strip|Island|Pacific|1500|2000

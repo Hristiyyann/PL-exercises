@@ -1,9 +1,0 @@
-# Airplanes Data File
-# Format: id|planeClassId|operational|baseAirport|flightHours
-LZ-SOF-001|Boeing 737-800|1|SOF|5000
-LZ-SOF-002|Boeing 737-800|1|SOF|3200
-LZ-SOF-003|Airbus A320|1|SOF|4500
-LZ-VAR-001|Embraer E190|1|VAR|2800
-LZ-VAR-002|Embraer E190|0|VAR|6000
-LZ-SOF-004|Boeing 777-300ER|1|SOF|12000
-LZ-SOF-005|Airbus A380|1|SOF|8000
